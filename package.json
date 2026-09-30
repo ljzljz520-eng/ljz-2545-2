@@ -1,0 +1,23 @@
+{
+  "name": "baigong-heritage",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node tests/acceptance.test.js",
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "test:all": "sh scripts/run-all.sh",
+    "reset": "npm run migrate && npm run seed"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.22.3",
+    "pg": "^8.23.0"
+  }
+}

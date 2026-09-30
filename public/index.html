@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>百工拾遗 · 非遗手作</title>
+<link rel="icon" href="/assets/svg/logo.svg">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site"><div class="wrap nav">
+  <a class="brand" href="/"><img src="/assets/svg/logo.svg" alt="">百工拾遗</a>
+  <nav>
+    <a href="/">首页</a><a href="/story">技艺故事</a><a href="/courses">课次报名</a>
+    <a href="/me">我的报名</a><a href="/design">设计依据</a><a href="/admin">管理台</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker">非 遗 手 作 · 竹 编</div>
+    <h1>一器一成，皆有来处</h1>
+    <p>走进闽北竹编：从一竹山、一缕篾，到传承人手中的六角编。<br>
+       材料、作品、传承人与课次在此串联；每一份展示与教学，都按用途单独授权、单独留存。</p>
+    <div class="hexband"></div>
+    <div class="btn-row" style="justify-content:center;margin-top:26px">
+      <a class="btn bamboo" href="/story">读技艺故事</a>
+      <a class="btn" href="/courses">看可参加课次</a>
+    </div>
+  </section>
+
+  <h2 class="section-title">本期作品</h2>
+  <div id="works" class="grid cols-3"></div>
+
+  <h2 class="section-title">近期课次 · 实时席位</h2>
+  <div id="courses" class="grid cols-2"></div>
+
+  <h2 class="section-title">席位怎么给？两种方案的取舍</h2>
+  <div class="grid cols-2">
+    <div class="panel">
+      <h3 style="margin-top:0;font-family:var(--font-serif)">实时扣减</h3>
+      <p class="muted">提交即扣库存，支付/确认失败再回补。</p>
+      <ul class="muted" style="padding-left:18px">
+        <li>优点：实现直接，库存永不超卖。</li>
+        <li>缺点：用户犹豫、网络抖动都会“占着名额”；失败回补存在窗口，易造成假性满员。</li>
+        <li>适用：秒杀、库存极紧且无需二次确认的场景。</li>
+      </ul>
+    </div>
+    <div class="panel" style="border-color:var(--bamboo);box-shadow:0 0 0 2px rgba(63,107,83,.15),var(--shadow)">
+      <h3 style="margin-top:0;font-family:var(--font-serif)">预约保留（本站采用）<span class="badge green">已实现</span></h3>
+      <p class="muted">报名成功先获得 <b id="holdsec">60</b> 秒短暂保留，确认后才锁定席位；超时自动回收，名额按候补顺序递补。</p>
+      <ul class="muted" style="padding-left:18px">
+        <li>公平：并发下数据库行锁 + 事务计数，两个浏览器不可能各自抢到“最后一个”。</li>
+        <li>健壮：断网重试走幂等键，重复提交服务端只认一笔。</li>
+        <li>不丢记录：撤回许可、授权到期只影响素材，不删除已发生的课程记录。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="section-title">两种“不可用”，原因不同</h2>
+  <div class="grid cols-2">
+    <div class="notice seat"><span class="ic">🎟️</span><div>
+      <strong>席位不可用</strong><div class="sub">属于<b>报名容量</b>问题：名额已满、占位超时、课次改期/取消、容量被管理员下调。可以进入候补或改报其他课次。</div>
+    </div></div>
+    <div class="notice content"><span class="ic">🚫</span><div>
+      <strong>内容不可用</strong><div class="sub">属于<b>内容授权</b>问题：传承人撤回展示许可、授权到期、尚未授权。作品与课程记录仍在，只是对应素材/教学文本暂时不展示。</div>
+    </div></div>
+  </div>
+</main>
+
+<footer class="site"><div class="wrap">
+  百工拾遗 · 非遗手作演示站　|　页面人物与作品均为虚构，视觉为原创 SVG/CSS 绘制<br>
+  PostgreSQL 持久化订单状态与发布版本 · 设计依据见 <a href="/design">/design</a>
+</div></footer>
+
+<script type="module">
+import { api, esc, fmtTime, availabilityNotice } from '/js/common.js';
+api('/api/health').then(h => { document.getElementById('holdsec').textContent = h.hold_seconds; });
+
+api('/api/works').then(({ data }) => {
+  document.getElementById('works').innerHTML = data.map(w => `
+    <a class="card" href="/story?slug=${esc(w.slug)}">
+      <div class="thumb">${w.availability.available
+        ? `<img src="${esc(w.cover_url)}" alt="${esc(w.title)}">`
+        : `<div class="cover-locked"><span style="font-size:26px">🚫</span>${esc(w.availability.title)}</div>`}</div>
+      <div class="body">
+        <h3>${esc(w.title)}</h3>
+        <div class="meta">${esc(w.subtitle)} · ${esc(w.inheritor_name)}</div>
+        <p class="muted" style="margin:4px 0">${w.availability.available ? esc(w.summary) : '作品记录保留，公开素材按授权状态停止展示。'}</p>
+        <span class="badge ${w.availability.available ? 'green' : 'red'}">${w.availability.available ? '展示中 v' + w.published_version : w.availability.title}</span>
+      </div>
+    </a>`).join('');
+});
+
+api('/api/courses').then(({ data }) => {
+  document.getElementById('courses').innerHTML = data.map(c => {
+    const s = c.seats;
+    const pct = Math.min(100, Math.round((s.reserved / Math.max(1, s.capacity)) * 100));
+    const full = s.free <= 0;
+    return `
+    <a class="card" href="/booking?slug=${esc(c.slug)}">
+      <div class="body">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+          <h3>${esc(c.title)}</h3>
+          ${c.status === 'rescheduled' ? '<span class="badge gold">已改期</span>' : ''}
+          ${c.status === 'canceled' ? '<span class="badge red">已取消</span>' : ''}
+        </div>
+        <div class="meta">${esc(c.inheritor_name)} · ${fmtTime(c.starts_at)} · ${esc(c.location)}</div>
+        <div class="seatbar"><span>${full ? '已满' : `可报 ${s.free}`} / ${s.capacity}</span>
+          <span class="bar"><i class="${full ? 'full' : ''}" style="width:${pct}%"></i></span></div>
+        <div class="seat-chips">
+          <span class="badge gray">确认 ${s.confirmed}</span>
+          <span class="badge gold">保留 ${s.held}</span>
+          <span class="badge blue">候补 ${s.waitlisted}</span>
+        </div>
+      </div>
+    </a>`;
+  }).join('');
+});
+</script>
+</body>
+</html>

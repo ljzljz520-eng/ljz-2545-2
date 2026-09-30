@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="蜕荷茶则（撤回示意）">
+  <rect width="480" height="320" fill="#dcd2bd"/>
+  <path d="M120 180q120-90 240 0-120 70-240 0z" fill="#b08f57"/>
+  <path d="M150 172l90 52" stroke="#7d6030" stroke-width="3"/>
+  <rect x="60" y="120" width="360" height="92" fill="#efe9da" opacity=".92"/>
+  <path d="M240 146v40M220 166h40" stroke="#7d6030" stroke-width="6" stroke-linecap="round"/>
+</svg>

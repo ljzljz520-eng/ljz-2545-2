@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>可参加课次 · 百工拾遗</title>
+<link rel="icon" href="/assets/svg/logo.svg"><link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site"><div class="wrap nav">
+  <a class="brand" href="/"><img src="/assets/svg/logo.svg" alt="">百工拾遗</a>
+  <nav><a href="/">首页</a><a href="/story">技艺故事</a><a href="/courses" class="active">课次报名</a>
+    <a href="/me">我的报名</a><a href="/design">设计依据</a><a href="/admin">管理台</a></nav>
+</div></header>
+<main class="wrap">
+  <section class="hero" style="padding-bottom:6px">
+    <div class="kicker">课 次 报 名</div>
+    <h1>可参加课次</h1>
+    <p>报名后席位短暂保留，请在倒计时内确认；超时自动释放并按候补顺序递补。页面每 5 秒刷新席位。</p>
+  </section>
+  <div id="list" class="grid cols-2" style="margin:24px 0"></div>
+</main>
+<footer class="site"><div class="wrap">席位由服务端事务计算，前端数字仅展示；最终以提交时服务端结果为准。</div></footer>
+<script type="module">
+import { api, esc, fmtFull, bindOfflineBanner, setActiveNav } from '/js/common.js';
+bindOfflineBanner(); setActiveNav();
+const list = document.getElementById('list');
+async function load() {
+  const { data } = await api('/api/courses');
+  list.innerHTML = data.map(c => {
+    const s = c.seats, full = s.free <= 0;
+    const pct = Math.min(100, (s.reserved / Math.max(1, s.capacity)) * 100);
+    return `<div class="card">
+      <div class="thumb">${c.work.display === 'active' ? `<img src="${esc(c.work.cover)}" alt="">` : '<div class="cover-locked">作品素材授权不可用，课程记录保留</div>'}</div>
+      <div class="body">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+          <h3>${esc(c.title)}</h3>
+          ${c.status === 'rescheduled' ? '<span class="badge gold">已改期</span>' : c.status === 'canceled' ? '<span class="badge red">已取消</span>' : '<span class="badge green">报名中</span>'}
+        </div>
+        <div class="meta">${fmtFull(c.starts_at)} · ${esc(c.location)}</div>
+        <p class="muted" style="margin:4px 0">${esc(c.description)}</p>
+        <div class="seatbar"><span>${full ? '已满' : `剩 ${s.free}`} / ${s.capacity}</span>
+          <span class="bar"><i class="${full ? 'full' : ''}" style="width:${Math.round(pct)}%"></i></span></div>
+        <div class="seat-chips">
+          <span class="badge green">确认 ${s.confirmed}</span>
+          <span class="badge gold">保留 ${s.held}</span>
+          <span class="badge blue">候补 ${s.waitlisted}</span>
+        </div>
+        <a class="btn ${c.status === 'canceled' ? 'ghost' : ''}" href="/booking?slug=${esc(c.slug)}" style="margin-top:auto;justify-content:center">
+          ${c.status === 'canceled' ? '查看课次' : full ? '加入候补 / 查看' : '报名（短暂保留）'}</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+load().catch(e => list.innerHTML = `<div class="notice content"><strong>加载失败</strong><span class="sub">${esc(e.message)}</span></div>`);
+setInterval(() => load().catch(() => {}), 5000);
+</script>
+</body>
+</html>

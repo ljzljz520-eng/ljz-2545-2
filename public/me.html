@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>我的报名 · 百工拾遗</title>
+<link rel="icon" href="/assets/svg/logo.svg"><link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site"><div class="wrap nav">
+  <a class="brand" href="/"><img src="/assets/svg/logo.svg" alt="">百工拾遗</a>
+  <nav><a href="/">首页</a><a href="/story">技艺故事</a><a href="/courses">课次报名</a>
+    <a href="/me" class="active">我的报名</a><a href="/design">设计依据</a><a href="/admin">管理台</a></nav>
+</div></header>
+<main class="wrap">
+  <section class="hero" style="padding-bottom:4px">
+    <div class="kicker">我 的 报 名</div><h1>跨浏览器可查</h1>
+    <p>用报名时填写的手机号/邮箱查询；已确认的课程记录不会因授权撤回或到期而删除。</p>
+  </section>
+  <div class="panel" style="margin:22px 0">
+    <label>手机号 / 邮箱</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <input id="contact" type="text" style="flex:1;min-width:240px" placeholder="13800000000 或 you@x.com">
+      <button class="btn bamboo" id="go">查询</button>
+    </div>
+  </div>
+  <div id="out"></div>
+</main>
+<footer class="site"><div class="wrap">订单状态以 PostgreSQL 持久化保存：held / confirmed / waitlisted / cancelled / expired。</div></footer>
+<script type="module">
+import { api, esc, fmtFull, badgeFor, getContact, setContact, bindOfflineBanner, setActiveNav } from '/js/common.js';
+bindOfflineBanner(); setActiveNav();
+const input = document.getElementById('contact'), out = document.getElementById('out');
+input.value = getContact();
+document.getElementById('go').onclick = run;
+input.addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+async function run() {
+  const c = input.value.trim();
+  if (!c) return;
+  setContact(c);
+  out.innerHTML = '<p class="muted">查询中…</p>';
+  try {
+    const { data } = await api(`/api/bookings/by-contact/${encodeURIComponent(c)}`);
+    if (!data.length) { out.innerHTML = '<div class="notice info"><span class="ic">🔍</span><div><strong>暂无报名记录</strong><div class="sub">该手机号/邮箱下没有订单。</div></div></div>'; return; }
+    out.innerHTML = `<div class="panel" style="padding:0;overflow-x:auto"><table>
+      <thead><tr><th>课次</th><th>状态</th><th>报名时时间(快照)</th><th>当前时间 / 课次状态</th><th>操作</th></tr></thead>
+      <tbody>${data.map(b => `
+        <tr>
+          <td><b>${esc(b.course_title)}</b><div class="muted">${fmtFull(b.created_at)} 提交</div></td>
+          <td>${badgeFor(b.status)}${b.hold_expires_at ? `<div class="muted">保留至 ${fmtFull(b.hold_expires_at)}</div>` : ''}</td>
+          <td>${fmtFull(b.course_snapshot.starts_at)} <span class="tag-license">快照 v${b.course_snapshot.schedule_version}</span></td>
+          <td>${fmtFull(b.course_starts_at)}
+            ${b.course_status === 'rescheduled' ? '<br><span class="badge gold">活动已改期</span>' : ''}
+            ${b.course_status === 'canceled' ? '<br><span class="badge red">课次已取消</span>' : ''}
+            ${b.course_schedule_version !== b.course_snapshot.schedule_version ? `<div class="muted">排期已更新到 v${b.course_schedule_version}，可免费取消</div>` : ''}</td>
+          <td><a class="btn ghost" style="padding:6px 12px" href="/booking?slug=${esc(b.course_slug)}&booking=${b.id}">查看/操作</a></td>
+        </tr>`).join('')}
+      </tbody></table></div>
+      <p class="muted">说明：撤回作品展示许可、授权到期，只会隐藏对应素材；上面的课程记录与作品名称始终保留。</p>`;
+  } catch (e) { out.innerHTML = `<div class="notice content"><strong>查询失败</strong><span class="sub">${esc(e.message)}</span></div>`; }
+}
+if (input.value) run();
+</script>
+</body>
+</html>

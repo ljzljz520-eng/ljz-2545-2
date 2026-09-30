@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="月隐茶篓重绘封面">
+  <rect width="480" height="320" fill="#26352c"/>
+  <circle cx="240" cy="120" r="74" fill="#e7dcc2"/>
+  <circle cx="268" cy="104" r="74" fill="#26352c"/>
+  <g transform="translate(240,210)">
+    <path d="M-78 -52h156l-13 92q-2 26-65 26t-65-26z" fill="#b89256"/>
+    <ellipse cx="0" cy="-52" rx="80" ry="17" fill="#e3cf9f"/>
+  </g>
+  <g stroke="#e3cf9f" stroke-width="1.6" opacity=".55">
+    <path d="M176 180h128M170 214h140M176 248h128"/>
+  </g>
+</svg>

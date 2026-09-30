@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>技艺故事 · 百工拾遗</title>
+<link rel="icon" href="/assets/svg/logo.svg">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site"><div class="wrap nav">
+  <a class="brand" href="/"><img src="/assets/svg/logo.svg" alt="">百工拾遗</a>
+  <nav><a href="/">首页</a><a href="/story" class="active">技艺故事</a><a href="/courses">课次报名</a>
+    <a href="/me">我的报名</a><a href="/design">设计依据</a><a href="/admin">管理台</a></nav>
+</div></header>
+<main class="wrap" id="app"><p class="muted">载入中…</p></main>
+<footer class="site"><div class="wrap">材料 · 作品 · 传承人 · 课次，以授权状态串联；撤回展示许可不影响已发生的课程记录。</div></footer>
+
+<script type="module">
+import { api, esc, fmtFull, availabilityNotice, getContact, setContact, setName, getName, bindOfflineBanner, setActiveNav } from '/js/common.js';
+bindOfflineBanner(); setActiveNav();
+
+const slug = new URLSearchParams(location.search).get('slug') || 'yueyin-basket';
+const app = document.getElementById('app');
+
+async function render() {
+  const contact = getContact();
+  const { data: d } = await api(`/api/works/${encodeURIComponent(slug)}?contact=${encodeURIComponent(contact)}`);
+  const a = d.availability;
+  const stepsPublic = d.steps.filter(s => s.display_text !== null).length;
+
+  app.innerHTML = `
+  <p class="muted" style="margin-top:18px"><a href="/">首页</a> / 作品 / ${esc(d.title)}</p>
+
+  <div class="story-head">
+    <div>
+      <span class="badge ${a.available ? 'green' : 'red'}">${a.available ? `展示版本 v${d.published_version}` : a.title}</span>
+      <h1>${esc(d.title)}</h1>
+      <div class="lead">${esc(d.subtitle)}</div>
+      <p class="muted">教学授权状态：<b>${esc(d.teaching_license.label)}</b>${d.teaching_license.expires_at ? `（到期 ${fmtFull(d.teaching_license.expires_at)}）` : '（长期有效）'}</p>
+      <div class="btn-row">
+        <a class="btn" href="/courses">报名相关课次</a>
+        <a class="btn ghost" href="#materials">看所用材料</a>
+      </div>
+    </div>
+    <div class="cover">${a.available
+      ? `<img src="${esc(d.cover_url)}" alt="${esc(d.title)}">`
+      : `<div class="cover-locked" style="aspect-ratio:auto;min-height:240px"><span style="font-size:40px">🚫</span>${esc(a.title)}<span class="muted">${esc(a.detail)}</span></div>`}</div>
+  </div>
+
+  ${a.available ? '' : availabilityNotice(a, 'content')}
+
+  <section class="inheritor-card">
+    <img src="${esc(d.inheritor.portrait_url)}" alt="${esc(d.inheritor.name)}">
+    <div>
+      <h3 style="margin:2px 0;font-family:var(--font-serif)">${esc(d.inheritor.name)}</h3>
+      <div class="meta">${esc(d.inheritor.title)} · ${esc(d.inheritor.region)}</div>
+      <p style="margin:6px 0 0;font-size:14.5px">${esc(d.inheritor.bio)}</p>
+    </div>
+  </section>
+
+  <h2 class="section-title" id="story">技艺故事</h2>
+  ${a.available
+    ? `<div class="story-body panel">${esc(d.story)}</div>`
+    : `<div class="panel muted">该作品的故事正文随展示许可一同停止公开；传承人信息与课程记录仍予保留。</div>`}
+
+  <h2 class="section-title" id="materials">所用材料</h2>
+  <div class="grid cols-3">
+    ${d.materials.map(m => `
+      <div class="card">
+        <div class="thumb">${m.availability.available
+          ? `<img src="${esc(m.image_url)}" alt="${esc(m.name)}">`
+          : `<div class="cover-locked"><span style="font-size:24px">🚫</span>${esc(m.availability.title)}</div>`}</div>
+        <div class="body">
+          <h3>${esc(m.name)}</h3>
+          <div class="meta">${esc(m.origin)} · 单位：${esc(m.unit)}</div>
+          <p class="muted" style="margin:2px 0">${m.availability.available ? esc(m.description) : '该材料素材按其自身授权状态停止展示，不影响作品文字与课程。'}</p>
+          <div class="muted">用途：${esc(m.usage_note)}</div>
+        </div>
+      </div>`).join('')}
+  </div>
+
+  <h2 class="section-title">制作步骤 · 展示版与教学版分离</h2>
+  <div class="notice info"><span class="ic">🧭</span><div>
+    <strong>两版步骤，用途各自授权</strong>
+    <div class="sub">左侧叙述是面向公众的<b>展示版</b>；折叠的操作细节是<b>教学版</b>，仅在「教学授权有效 + 你已确认报名该作品课程」时解锁。展示许可撤回不影响教学，反之亦然。</div>
+  </div></div>
+
+  ${d.enrollment && !d.enrollment.teaching_unlocked ? `
+  <div class="panel" style="margin-bottom:16px">
+    <label>输入报名时的手机号/邮箱以解锁教学版（仅本机保存）</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <input id="contactInput" type="text" value="${esc(contact)}" placeholder="例如 13800000000 或 you@x.com" style="flex:1;min-width:220px">
+      <button class="btn bamboo" id="contactBtn">查询我的报名</button>
+    </div>
+    <p class="muted" id="teachReason">${esc(d.enrollment.teaching_reason || '')}</p>
+  </div>` : ''}
+
+  <div class="timeline">
+    ${d.steps.map(s => `
+      <div class="step">
+        <div style="font-family:var(--font-serif);font-size:16px"><span class="n">第 ${s.step_no} 步</span>${esc(s.title)}</div>
+        ${s.display_text ? `<p style="margin:8px 0 0">${esc(s.display_text)}</p>`
+          : `<p class="muted" style="margin:8px 0 0">（展示版步骤随作品展示许可停止公开）</p>`}
+        ${s.teaching.unlocked
+          ? `<div class="teach-open"><b>教学版 ✅</b><div>${esc(s.teaching.text)}</div><div class="muted" style="margin-top:4px">课堂提示：${esc(s.teaching.tip)}</div></div>`
+          : `<div class="teach-lock">🔒 教学版未解锁：${esc(s.teaching.reason)}（教学授权：${s.teaching.license_state === 'active' ? '有效' : s.teaching.license_state}）</div>`}
+      </div>`).join('')}
+  </div>
+
+  <h2 class="section-title">相关课次</h2>
+  <div class="grid cols-2">
+    ${d.courses.map(c => `
+      <a class="card" href="/booking?slug=${esc(c.slug)}">
+        <div class="body">
+          <div style="display:flex;justify-content:space-between">
+            <h3>${esc(c.title)}</h3>
+            ${c.status === 'rescheduled' ? '<span class="badge gold">已改期</span>' : ''}
+            ${c.status === 'canceled' ? '<span class="badge red">已取消</span>' : ''}
+          </div>
+          <div class="meta">${fmtFull(c.starts_at)} · ${esc(c.location)}</div>
+          <div class="muted">课次排期版本 v${c.schedule_version}（改期后递增；历史订单保留报名时快照）</div>
+        </div>
+      </a>`).join('')}
+  </div>
+
+  <h2 class="section-title">发布版本留存</h2>
+  <div class="panel" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>版本</th><th>说明</th><th>发布人</th><th>时间</th></tr></thead>
+      <tbody>${d.versions.map(v => `<tr>
+        <td>v${v.version}${v.version === d.published_version ? ' <span class="badge green">当前</span>' : ''}</td>
+        <td>${esc(v.change_note)}</td><td>${esc(v.published_by)}</td><td>${fmtFull(v.created_at)}</td></tr>`).join('')}
+      </tbody></table>
+  </div>
+
+  <p class="muted" style="margin:20px 0 8px">
+    切换作品：
+    <a href="/story?slug=yueyin-basket">月隐茶篓</a> ·
+    <a href="/story?slug=shanlan-sieve">山岚米筛</a> ·
+    <a href="/story?slug=tuihe-tide">蜕荷茶则（撤回演示）</a>
+  </p>`;
+
+  const ci = document.getElementById('contactInput');
+  if (ci) {
+    document.getElementById('contactBtn').onclick = () => {
+      const v = ci.value.trim();
+      if (!v) return;
+      setContact(v);
+      location.reload();
+    };
+  }
+}
+
+render().catch(e => {
+  app.innerHTML = `<div class="notice content"><span class="ic">⚠️</span><div><strong>加载失败</strong><div class="sub">${esc(e.message)}</div></div></div>`;
+});
+</script>
+</body>
+</html>

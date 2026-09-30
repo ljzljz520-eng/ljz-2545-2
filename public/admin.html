@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>管理台 · 百工拾遗</title>
+<link rel="icon" href="/assets/svg/logo.svg"><link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site"><div class="wrap nav">
+  <a class="brand" href="/"><img src="/assets/svg/logo.svg" alt="">百工拾遗 · 管理台</a>
+  <nav><a href="/">首页</a><a href="/story">技艺故事</a><a href="/courses">课次报名</a>
+    <a href="/me">我的报名</a><a href="/design">设计依据</a><a href="/admin" class="active">管理台</a></nav>
+</div></header>
+<main class="wrap">
+  <section class="hero" style="padding-bottom:4px">
+    <div class="kicker">内 容 授 权 · 课 程 席 位</div><h1>运维管理台</h1>
+    <p>调整容量、改期、换图、撤回/恢复授权；所有操作写审计与发布版本，均不删除历史课程记录。</p>
+  </section>
+
+  <div class="panel" style="margin:20px 0">
+    <label>管理员令牌（X-Admin-Token，默认 dev-admin-token）</label>
+    <div style="display:flex;gap:10px"><input id="token" type="text" value="dev-admin-token" style="flex:1">
+    <button class="btn ghost" id="saveToken">保存</button></div>
+  </div>
+
+  <h2 class="section-title">课次与席位</h2>
+  <div id="courses"></div>
+
+  <h2 class="section-title">作品素材与授权</h2>
+  <div id="works"></div>
+
+  <h2 class="section-title">审计日志（近 100 条）</h2>
+  <div class="panel" style="padding:0;overflow-x:auto"><table id="audit"><tbody><tr><td class="muted">加载中…</td></tr></tbody></table></div>
+</main>
+<footer class="site"><div class="wrap">减容量下限 = 已确认 + 有效保留；撤回展示许可只下架对应素材。</div></footer>
+
+<script type="module">
+import { api, esc, fmtFull, toast, bindOfflineBanner, setActiveNav } from '/js/common.js';
+bindOfflineBanner(); setActiveNav();
+const TOKEN_KEY = 'admin_token';
+const tokenEl = document.getElementById('token');
+tokenEl.value = localStorage.getItem(TOKEN_KEY) || 'dev-admin-token';
+document.getElementById('saveToken').onclick = () => { localStorage.setItem(TOKEN_KEY, tokenEl.value.trim()); toast('令牌已保存', 'ok'); };
+const H = () => ({ 'Content-Type': 'application/json', 'X-Admin-Token': tokenEl.value.trim() });
+const post = async (path, body) => api(path, { method: 'POST', headers: H(), body });
+
+const COURSES = [
+  ['44444444-0000-0000-0000-000000000001','月隐茶篓 · 周末手作课'],
+  ['44444444-0000-0000-0000-000000000002','山岚米筛 · 两日工坊'],
+  ['44444444-0000-0000-0000-000000000003','单名额竞态体验课'],
+];
+const WORKS = [
+  ['22222222-0000-0000-0000-000000000001','月隐茶篓','yueyin-basket'],
+  ['22222222-0000-0000-0000-000000000002','山岚米筛','shanlan-sieve'],
+  ['22222222-0000-0000-0000-000000000003','蜕荷茶则','tuihe-tide'],
+];
+const INH = '11111111-0000-0000-0000-000000000001';
+
+function coursePanel(c) {
+  const s = c.seats;
+  return `<div class="panel" style="margin-bottom:16px" data-cid="${c.id}">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center">
+      <h3 style="margin:0;font-family:var(--font-serif)">${esc(c.title)} <span class="muted">(${esc(c.slug)})</span></h3>
+      <div>${c.status==='rescheduled'?'<span class="badge gold">已改期</span>':''} v${c.schedule_version}</div>
+    </div>
+    <div class="seat-chips" style="margin-top:10px">
+      <span class="badge gray">容量 ${s.capacity}</span>
+      <span class="badge green">确认 ${s.confirmed}</span>
+      <span class="badge gold">保留 ${s.held}</span>
+      <span class="badge blue">候补 ${s.waitlisted}</span>
+      <span class="badge ${s.free?'green':'red'}">空余 ${s.free}</span>
+    </div>
+    <div class="grid cols-2" style="gap:12px;margin-top:8px">
+      <div>
+        <label>调整容量（低于 已确认+有效保留 会被拒绝）</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" min="0" value="${s.capacity}" data-cap>
+          <button class="btn bamboo" data-act="cap">应用</button></div>
+      </div>
+      <div>
+        <label>活动改期（开始 / 结束）</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="datetime-local" data-start style="flex:1;min-width:170px">
+          <input type="datetime-local" data-end style="flex:1;min-width:130px">
+          <button class="btn" data-act="re">改期</button></div>
+      </div>
+    </div>
+    <div class="muted" data-msg style="margin-top:8px"></div>
+  </div>`;
+}
+
+async function loadCourses() {
+  const { data } = await api('/api/courses');
+  document.getElementById('courses').innerHTML = data.filter(c => new Date(c.starts_at) > new Date()).map(coursePanel).join('');
+  document.querySelectorAll('[data-cid]').forEach(panel => {
+    const cid = panel.dataset.cid;
+    const msg = panel.querySelector('[data-msg]');
+    panel.querySelector('[data-act=cap]').onclick = async () => {
+      const cap = Number(panel.querySelector('[data-cap]').value);
+      try { const r = await post(`/api/admin/courses/${cid}/capacity`, { capacity: cap });
+        msg.innerHTML = `<span style="color:var(--bamboo-dark)">✓ 容量已改为 ${r.data.capacity}（已确认 ${r.data.confirmed} / 保留 ${r.data.live_held}），已生成发布版本</span>`;
+        toast('容量已调整并发布', 'ok'); loadCourses(); loadAudit();
+      } catch (e) { msg.innerHTML = `<span style="color:var(--seal)">✗ ${esc(e.message)}</span>`; toast(e.message, 'err'); }
+    };
+    panel.querySelector('[data-act=re]').onclick = async () => {
+      const st = panel.querySelector('[data-start').value;
+      const en = panel.querySelector('[data-end]').value;
+      if (!st || !en) return toast('请选择开始与结束时间', 'err');
+      try { const r = await post(`/api/admin/courses/${cid}/reschedule`, {
+        starts_at: new Date(st).toISOString(), ends_at: new Date(en).toISOString() });
+        msg.innerHTML = `<span style="color:var(--bamboo-dark)">✓ 已改期，排期 v${r.data.schedule_version}，通知 ${r.data.affected} 名学员，发布版本 v${r.data.published_version}</span>`;
+        toast('改期成功，已通知在订学员', 'ok'); loadCourses(); loadAudit();
+      } catch (e) { msg.innerHTML = `<span style="color:var(--seal)">✗ ${esc(e.message)}</span>`; }
+    };
+  });
+}
+
+function workPanel(w) {
+  return `<div class="panel" style="margin-bottom:16px" data-wid="${w.id}">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap">
+      <h3 style="margin:0;font-family:var(--font-serif)">${esc(w.title)} <span class="muted">(${esc(w.slug)})</span></h3>
+      <span class="badge ${w.availability.available?'green':'red'}">${w.availability.available?'展示中 v'+w.published_version:w.availability.title}</span>
+    </div>
+    <div class="grid cols-2" style="gap:12px;margin-top:10px">
+      <div>
+        <label>更换展示图（旧图留存，可选项）</label>
+        <div style="display:flex;gap:8px">
+          <select data-asset>
+            <option value="/assets/svg/work-yueyin-v2.svg">月隐-重绘版 v2</option>
+            <option value="/assets/svg/work-yueyin.svg">月隐-初版</option>
+            <option value="/assets/svg/work-shanlan.svg">山岚米筛图</option>
+            <option value="/assets/svg/work-tuihe.svg">蜕荷图</option>
+          </select>
+          <button class="btn bamboo" data-act="swap">换图并发布</button></div>
+      </div>
+      <div>
+        <label>展示授权</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" data-act="withdraw">撤回展示许可</button>
+          <button class="btn ghost" data-act="restore">恢复（长期）</button>
+          <button class="btn ghost" data-act="expire">恢复并 3 天后到期</button></div>
+      </div>
+    </div>
+    <div class="muted" data-msg style="margin-top:8px"></div>
+  </div>`;
+}
+
+async function loadWorks() {
+  const { data } = await api('/api/works');
+  document.getElementById('works').innerHTML = data.map(workPanel).join('');
+  document.querySelectorAll('[data-wid]').forEach(panel => {
+    const wid = panel.dataset.wid, msg = panel.querySelector('[data-msg]');
+    const lic = async (status, extra={}) => {
+      try { const r = await post('/api/admin/licenses', { licensor_id: INH, subject_type:'work', subject_id: wid, purpose:'display', status, ...extra });
+        msg.innerHTML = `<span style="color:var(--bamboo-dark)">✓ 授权状态已更新：${esc(status)} ${r.data.expires_at?('到期 '+fmtFull(r.data.expires_at)):''}（只影响素材，不动课程记录）</span>`;
+        toast('授权已更新', 'ok'); loadWorks(); loadAudit();
+      } catch (e) { msg.innerHTML = `<span style="color:var(--seal)">✗ ${esc(e.message)}</span>`; }
+    };
+    panel.querySelector('[data-act=withdraw]').onclick = () => lic('withdrawn', { scope_note: '管理台撤回展示许可' });
+    panel.querySelector('[data-act=restore]').onclick = () => lic('active');
+    panel.querySelector('[data-act=expire]').onclick = () => lic('active', { expires_at: new Date(Date.now()+3*864e5).toISOString() });
+    panel.querySelector('[data-act=swap]').onclick = async () => {
+      const url = panel.querySelector('[data-asset]').value;
+      try { const r = await post(`/api/admin/works/${wid}/swap-image`, { asset_url: url, note: '管理台换图' });
+        msg.innerHTML = `<span style="color:var(--bamboo-dark)">✓ 已换图（旧图留存于素材版本），作品发布 v${r.data.published_version}</span>`;
+        toast('换图成功并生成新版本', 'ok'); loadWorks(); loadAudit();
+      } catch (e) { msg.innerHTML = `<span style="color:var(--seal)">✗ ${esc(e.message)}</span>`; }
+    };
+  });
+}
+
+async function loadAudit() {
+  try {
+    const { data } = await api('/api/admin/audit', { headers: H() });
+    document.querySelector('#audit tbody').innerHTML = data.map(a =>
+      `<tr><td>${fmtFull(a.created_at)}</td><td>${esc(a.actor)}</td><td><b>${esc(a.action)}</b></td><td class="muted">${esc(a.target)}</td><td class="muted">${esc(JSON.stringify(a.detail))}</td></tr>`).join('');
+  } catch (e) { document.querySelector('#audit tbody').innerHTML = `<tr><td class="muted">审计读取失败：${esc(e.message)}</td></tr>`; }
+}
+
+loadCourses().catch(e => toast(e.message,'err'));
+loadWorks().catch(e => toast(e.message,'err'));
+loadAudit();
+setInterval(loadCourses, 6000);
+</script>
+</body>
+</html>

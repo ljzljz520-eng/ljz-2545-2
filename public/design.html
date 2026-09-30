@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>设计依据 · 百工拾遗</title>
+<link rel="icon" href="/assets/svg/logo.svg"><link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site"><div class="wrap nav">
+  <a class="brand" href="/"><img src="/assets/svg/logo.svg" alt="">百工拾遗</a>
+  <nav><a href="/">首页</a><a href="/story">技艺故事</a><a href="/courses">课次报名</a>
+    <a href="/me">我的报名</a><a href="/design" class="active">设计依据</a><a href="/admin">管理台</a></nav>
+</div></header>
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker">原 创 视 觉 · 站 内 设 计 依 据</div>
+    <h1>为什么这样设计</h1>
+    <p>所有图形均为本项目原创绘制（SVG/CSS），不使用任何外部图片素材；色彩、纹样与版式都来自非遗竹编这一主题本身。</p>
+    <div class="hexband"></div>
+  </section>
+
+  <h2 class="section-title">一、色彩：从器物中取色</h2>
+  <div class="grid cols-3">
+    <div class="panel"><div style="height:64px;background:#3f6b53;border-radius:8px"></div><h3>竹青 #3F6B53</h3><p class="muted">新竹表皮与“留青收口”，作主色/确认态。</p></div>
+    <div class="panel"><div style="height:64px;background:#c4a15f;border-radius:8px"></div><h3>竹黄 #C4A15F</h3><p class="muted">去青后的竹黄篾，用于高亮与候补/保留态。</p></div>
+    <div class="panel"><div style="height:64px;background:#8c3a2b;border-radius:8px"></div><h3>朱砂印 #8C3A2B</h3><p class="muted">题落款印章色，用于关键动作、撤回/到期警示。</p></div>
+    <div class="panel"><div style="height:64px;background:#f6f0e2;border-radius:8px;border:1px solid var(--line)"></div><h3>宣纸 #F6F0E2</h3><p class="muted">背景底色，叠加 CSS 生成的纤维纹理。</p></div>
+    <div class="panel"><div style="height:64px;background:#2f2a20;border-radius:8px"></div><h3>墨 #2F2A20</h3><p class="muted">正文文字，取松烟墨色。</p></div>
+    <div class="panel"><div style="height:64px;background:repeating-linear-gradient(45deg,#3f6b53 0 12px,#8aa86a 12px 24px);border-radius:8px"></div><h3>编纹</h3><p class="muted">六角编 pattern 用于分隔带与占位锁定纹理。</p></div>
+  </div>
+
+  <h2 class="section-title">二、原创图形清单</h2>
+  <div class="grid cols-3">
+    <div class="card"><div class="thumb"><img src="/assets/svg/logo.svg" style="object-fit:contain;padding:24px"></div><div class="body"><h3>站点印章 Logo</h3><p class="muted">方形印面 + 抽象竹编经纬线。</p></div></div>
+    <div class="card"><div class="thumb"><img src="/assets/svg/work-yueyin.svg"></div><div class="body"><h3>月隐茶篓</h3><p class="muted">SVG pattern 画六角空花，月夜负形。</p></div></div>
+    <div class="card"><div class="thumb"><img src="/assets/svg/work-shanlan.svg"></div><div class="body"><h3>山岚米筛</h3><p class="muted">同心圆 + 经纬密编，夹底红绳。</p></div></div>
+    <div class="card"><div class="thumb"><img src="/assets/svg/portrait-lin.svg"></div><div class="body"><h3>传承人画像</h3><p class="muted">虚构人物的几何风格示意像。</p></div></div>
+    <div class="card"><div class="thumb"><img src="/assets/svg/material-bamboo.svg"></div><div class="body"><h3>材料图标 ×4</h3><p class="muted">毛竹/桐油/篾片/红棉线，统一线面风格。</p></div></div>
+    <div class="card"><div class="thumb"><img src="/assets/svg/work-tuihe.svg"></div><div class="body"><h3>撤回占位图</h3><p class="muted">斜纹与“—”符号表达素材下架但记录保留。</p></div></div>
+  </div>
+
+  <h2 class="section-title">三、信息架构与状态语义</h2>
+  <div class="panel">
+    <p><b>技艺故事页</b>是中心：传承人 → 作品 → 材料 → 展示/教学两版步骤 → 相关课次 → 发布版本，一屏串联。</p>
+    <p><b>两类不可用使用两种颜色与图标</b>，避免用户混淆：</p>
+    <ul>
+      <li><span class="badge gold">席位问题</span> 容量满、占位超时、改期/取消、管理员减容量 → 黄色提示条 🎟️，引导候补/改报。</li>
+      <li><span class="badge red">内容问题</span> 撤回许可、授权到期、未授权 → 朱砂提示条 🚫/⏳，说明素材下架但记录保留。</li>
+    </ul>
+    <p><b>状态色统一</b>：确认=竹青、短暂保留/候补=竹黄、撤回/过期/取消=朱砂/灰。全站徽标一致。</p>
+  </div>
+
+  <h2 class="section-title">四、关键交互设计</h2>
+  <div class="grid cols-2">
+    <div class="panel"><h3 style="margin-top:0">短暂保留 + 倒计时</h3><p class="muted">报名成功即出现以<b>服务端过期时间</b>为准的倒计时；到点前端不自行判定成败，而是重新轮询订单，避免时钟偏差。</p></div>
+    <div class="panel"><h3 style="margin-top:0">候补顺序可视化</h3><p class="muted">候补中显示排队位置，4 秒轮询；被晋升为保留时自动切换到倒计时，全流程可感知。</p></div>
+    <div class="panel"><h3 style="margin-top:0">断网不重复报</h3><p class="muted">顶部断网站标 + 本地保存报名信息 + 固定幂等键自动重试；服务端同键返回原单（retried=true）。</p></div>
+    <div class="panel"><h3 style="margin-top:0">改期可追溯</h3><p class="muted">订单同时显示“报名时快照时间”和“当前排期时间/版本”，出现“已改期”徽标并允许免费取消。</p></div>
+  </div>
+
+  <h2 class="section-title">五、技术取舍</h2>
+  <div class="panel">
+    <p>采用 <b>预约保留（hold-then-confirm）</b>而非实时扣减：数据库 <code>SELECT … FOR UPDATE</code> 锁定课次行后在同一事务内统计
+       <code>held + confirmed</code>，再决定“保留 / 候补”，因此并发下绝不超卖；超时由后台 sweeper 与请求事务双重回收，
+       回收后按 <code>waitlist_seq</code> 用 <code>FOR UPDATE SKIP LOCKED</code> 顺序晋升候补。</p>
+    <p>持久化全部落在 PostgreSQL：订单状态机、订单事件、发布版本（作品换图/步骤修订/改期/容量变更）、审计日志。撤回授权仅更新许可行，不删除任何课程记录。</p>
+  </div>
+</main>
+<footer class="site"><div class="wrap">设计令牌（design tokens）见 public/css/style.css 的 :root 声明。</div></footer>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>课次报名 · 百工拾遗</title>
+<link rel="icon" href="/assets/svg/logo.svg"><link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="site"><div class="wrap nav">
+  <a class="brand" href="/"><img src="/assets/svg/logo.svg" alt="">百工拾遗</a>
+  <nav><a href="/">首页</a><a href="/story">技艺故事</a><a href="/courses" class="active">课次报名</a>
+    <a href="/me">我的报名</a><a href="/design">设计依据</a><a href="/admin">管理台</a></nav>
+</div></header>
+<main class="wrap" id="app"><p class="muted">载入中…</p></main>
+<footer class="site"><div class="wrap">服务端处理：重复提交（幂等键）、占位过期（定时回收）、管理员减容量（下限保护）与候补顺序晋升。</div></footer>
+
+<script type="module">
+import { api, submitWithRetry, esc, fmtFull, countdown, toast, idemKey, saveIdem, getIdem,
+         getContact, setContact, getName, setName, bindOfflineBanner, setActiveNav } from '/js/common.js';
+bindOfflineBanner(); setActiveNav();
+
+const slug = new URLSearchParams(location.search).get('slug');
+const app = document.getElementById('app');
+let course = null, timerStop = null, pollHandle = null;
+
+async function load() {
+  const { data } = await api(`/api/courses/${encodeURIComponent(slug)}`);
+  course = data;
+  render();
+}
+
+function seatsPanel() {
+  const s = course.seats;
+  const full = s.free <= 0;
+  const pct = Math.min(100, (s.reserved / Math.max(1, s.capacity)) * 100);
+  return `
+    <div class="seatbar" style="font-size:15px">
+      <span style="font-family:var(--font-serif);font-weight:700;color:var(--ink)">${full ? '名额已满' : `可报 ${s.free} 个`}</span>
+      <span>（容量 ${s.capacity}）</span>
+      <span class="bar"><i class="${full ? 'full' : ''}" style="width:${Math.round(pct)}%"></i></span>
+    </div>
+    <div class="seat-chips">
+      <span class="badge green">已确认 ${s.confirmed}</span>
+      <span class="badge gold">保留中 ${s.held}</span>
+      <span class="badge blue">候补中 ${s.waitlisted}</span>
+    </div>`;
+}
+
+function render() {
+  const s = course.seats;
+  const isOld = new Date(course.starts_at) < new Date();
+  app.innerHTML = `
+  <p class="muted" style="margin-top:18px"><a href="/courses">课次报名</a> / ${esc(course.title)}</p>
+
+  <div class="grid cols-2" style="margin:18px 0;align-items:start">
+    <div class="panel">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <h1 style="margin:0;font-family:var(--font-serif);font-size:28px">${esc(course.title)}</h1>
+        ${course.status === 'rescheduled' ? '<span class="badge gold">活动已改期</span>' : ''}
+        ${course.status === 'canceled' ? '<span class="badge red">已取消</span>' : ''}
+        ${isOld ? '<span class="badge gray">往期课次（记录留存）</span>' : ''}
+      </div>
+      <dl class="kv" style="margin-top:14px">
+        <dt>传承人</dt><dd>${esc(course.inheritor_name)}</dd>
+        <dt>时间</dt><dd>${fmtFull(course.starts_at)} — ${new Date(course.ends_at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}</dd>
+        <dt>地点</dt><dd>${esc(course.location)}</dd>
+        <dt>排期版本</dt><dd>v${course.schedule_version}${course.original_starts_at ? `（原定 ${fmtFull(course.original_starts_at)}）` : ''}</dd>
+      </dl>
+      <p class="muted">${esc(course.description)}</p>
+      ${course.status === 'rescheduled' ? `<div class="notice seat"><span class="ic">📅</span><div><strong>活动已改期</strong><div class="sub">时间发生变化（排期版本升至 v${course.schedule_version}）。如新时间不合适，你可以在报名确认后免费取消；订单中始终保留报名时的时间快照。</div></div></div>` : ''}
+      ${course.status === 'canceled' ? `<div class="notice content"><span class="ic">⛔</span><div><strong>课次已取消</strong><div class="sub">这是席位不可用的一种原因；历史订单与排期版本仍可查询。</div></div></div>` : ''}
+    </div>
+
+    <div class="panel" id="actionPanel">
+      <h2 style="margin-top:0;font-family:var(--font-serif)">席位状态</h2>
+      ${seatsPanel()}
+      <div class="divider"></div>
+      <div id="formArea">${course.status === 'scheduled' && !isOld ? bookingForm(s) : `
+        <div class="notice ${course.status === 'canceled' ? 'content' : 'seat'}">
+          <span class="ic">${course.status === 'canceled' ? '⛔' : '🎟️'}</span>
+          <div><strong>${course.status === 'canceled' ? '报名入口关闭' : '课次已结束'}</strong>
+          <div class="sub">${course.status === 'canceled' ? '课次取消后不再接受报名。' : '往期课次记录留存，可在故事页查看。'}</div></div></div>`}
+      </div>
+      <div class="divider"></div>
+      <h3 style="font-family:var(--font-serif)">发布 / 排期版本</h3>
+      <table>
+        <thead><tr><th>版本</th><th>变更</th><th>时间</th></tr></thead>
+        <tbody>${course.versions.slice(0,4).map(v => `<tr><td>v${v.version}</td><td>${esc(v.change_note)}</td><td>${fmtFull(v.created_at)}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+
+  const btn = document.getElementById('bookBtn');
+  if (btn) btn.onclick = onBook;
+  wireOrderActions();
+}
+
+function bookingForm(s) {
+  const full = s.free <= 0;
+  return `
+    <p class="muted">${full
+      ? '当前可报名额为 0：提交后进入<b>候补队列</b>。有人取消确认或占位超时，系统将按排队顺序把你提升为「短暂保留」。'
+      : `提交即获得 <b>${s.hold_seconds}</b> 秒短暂保留；请在倒计时结束前确认，否则名额自动释放。`}</p>
+    <label>姓名</label><input id="fName" type="text" value="${esc(getName())}" placeholder="你的称呼">
+    <label>手机号 / 邮箱（跨浏览器识别同一学员，防止重复报名）</label>
+    <input id="fContact" type="text" value="${esc(getContact())}" placeholder="13800000000 / you@x.com">
+    <div class="btn-row">
+      <button class="btn ${full ? 'bamboo' : ''}" id="bookBtn">${full ? '加入候补' : '提交报名并短暂保留席位'}</button>
+    </div>
+    <p class="muted" style="margin-top:10px">断网时请求会自动保留并重试；同一报名用固定幂等键，重试不会产生两笔订单。</p>`;
+}
+
+async function onBook() {
+  const name = document.getElementById('fName').value.trim();
+  const contact = document.getElementById('fContact').value.trim();
+  if (!name || !contact) return toast('请填写姓名和手机号/邮箱', 'err');
+  setName(name); setContact(contact);
+  // 幂等键在“同一人 + 同一课次”的报名意图内固定（跨断网重试保持一致）
+  let key = getIdem(`book:${course.id}:${contact}`);
+  if (!key) { key = idemKey('book', { c: course.id, u: contact }); saveIdem(`book:${course.id}:${contact}`, key); }
+  const btn = document.getElementById('bookBtn'); btn.disabled = true; btn.textContent = '提交中…';
+  try {
+    const r = await submitWithRetry('/api/bookings', {
+      course_id: course.id, student_name: name, student_contact: contact, idempotency_key: key,
+    });
+    if (r.retried) toast('这是断网后的重试：服务器返回了你原来的订单，未重复报名', 'ok');
+    await showOrder(r.data.booking.id);
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '重试提交';
+    if (e.body?.error === 'already_enrolled') {
+      toast('你已报名该课次，正在打开原订单…', 'err');
+      return showOrder(e.body.existing_booking_id);
+    }
+    toast(e.message, 'err');
+  }
+}
+
+async function showOrder(id) {
+  const { data, seats } = await api(`/api/bookings/${id}`);
+  course.seats = seats;
+  renderOrder(data);
+}
+
+function renderOrder({ booking, events, snapshot }) {
+  const formArea = document.getElementById('formArea');
+  const b = booking;
+  window.__bookingId = b.id;
+  const labels = { held:'席位短暂保留中', confirmed:'报名已确认', waitlisted:'你在候补队列中', cancelled:'订单已取消', expired:'占位已过期' };
+  formArea.innerHTML = `
+    <h3 style="font-family:var(--font-serif);margin-top:0">${labels[b.status]}</h3>
+    <div id="statusLine"></div>
+    ${b.status === 'held' ? `
+      <div class="notice seat"><span class="ic">⏱️</span><div><strong>请在 <span class="countdown" id="cd">--</span> 内确认</strong>
+        <div class="sub">超时后占位自动失效并释放；若有候补，将立即按顺序递补。</div></div></div>
+      <div class="btn-row">
+        <button class="btn" id="confirmBtn">确认报名，锁定席位</button>
+        <button class="btn ghost" id="cancelBtn">放弃保留</button>
+      </div>` : ''}
+    ${b.status === 'waitlisted' ? `
+      <div class="notice info"><span class="ic">🧵</span><div><strong>候补第 <span id="wpos">…</span> 位</strong>
+        <div class="sub">页面每 4 秒轮询一次；轮到你时会获得短暂保留并开始倒计时。</div></div></div>` : ''}
+    ${b.status === 'confirmed' ? `
+      <div class="notice info"><span class="ic">✅</span><div><strong>席位已锁定</strong><div class="sub">如无法参加可取消，名额将让给候补第一位。${course.status === 'rescheduled' ? '课次已改期，你可免费取消。' : ''}</div></div></div>
+      <div class="btn-row"><button class="btn ghost" id="cancelBtn">取消报名</button></div>` : ''}
+    ${b.status === 'cancelled' ? `<div class="notice"><span class="ic">↩️</span><div><strong>已取消</strong><div class="sub">历史订单保留；若课次仍开放，可重新报名（新排队号）。</div></div></div>
+      <button class="btn bamboo" id="rebookBtn" style="margin-top:10px">重新报名</button>` : ''}
+    ${b.status === 'expired' ? `<div class="notice content"><span class="ic">⌛</span><div><strong>占位超时</strong><div class="sub">名额已被系统回收并按候补顺序递补，你不会被计费。</div></div></div>
+      <button class="btn bamboo" id="rebookBtn" style="margin-top:10px">重新报名 / 进入候补</button>` : ''}
+
+    <div class="divider"></div>
+    <dl class="kv">
+      <dt>订单号</dt><dd class="muted" style="word-break:break-all">${b.id}</dd>
+      <dt>报名课次</dt><dd>${esc(snapshot.title)}</dd>
+      <dt>报名时时间</dt><dd>${fmtFull(snapshot.starts_at)}（快照 v${snapshot.schedule_version}）</dd>
+      <dt>当前排期</dt><dd>${fmtFull(course.starts_at)}（v${course.schedule_version}）${course.schedule_version !== snapshot.schedule_version ? ' <span class="badge gold">已改期</span>' : ''}</dd>
+      <dt>提交时间</dt><dd>${fmtFull(b.created_at)}</dd>
+    </dl>
+    <details style="margin-top:8px"><summary class="muted">订单事件流水（${events.length}）</summary>
+      <table style="margin-top:8px"><tbody>${events.map(ev => `<tr><td>${fmtFull(ev.created_at)}</td><td>${ev.type}</td></tr>`).join('')}</tbody></table>
+    </details>`;
+
+  if (timerStop) timerStop();
+  if (b.status === 'held' && b.hold_expires_at) {
+    timerStop = countdown(b.hold_expires_at,
+      (sec) => { const el = document.getElementById('cd'); if (el) el.textContent = `${sec}s`; },
+      async () => { toast('占位已超时，正在刷新状态…', 'err'); await refreshBooking(b.id); });
+  }
+  if (b.status === 'waitlisted') startPolling(b.id);
+  wireOrderActions(b.id);
+  // 更新右侧席位
+  const panel = document.getElementById('actionPanel');
+  const bar = panel.querySelector('.seat-chips');
+  if (bar) {
+    bar.innerHTML = `<span class="badge green">已确认 ${course.seats.confirmed}</span>
+      <span class="badge gold">保留中 ${course.seats.held}</span>
+      <span class="badge blue">候补中 ${course.seats.waitlisted}</span>`;
+  }
+}
+
+function startPolling(id) {
+  if (pollHandle) clearInterval(pollHandle);
+  let n = 0;
+  pollHandle = setInterval(async () => {
+    n++;
+    try {
+      const r = await api(`/api/bookings/${id}/poll`);
+      course.seats = r.seats;
+      const wposEl = document.getElementById('wpos');
+      if (wposEl) {
+        const pos = Math.max(1, r.seats.waitlisted);
+        wposEl.textContent = r.data.status === 'waitlisted' ? pos : '—';
+      }
+      if (r.data.status !== 'waitlisted') { clearInterval(pollHandle); await refreshBooking(id); }
+    } catch {}
+    if (n > 40) clearInterval(pollHandle);
+  }, 4000);
+}
+
+async function refreshBooking(id) {
+  try { const { data, seats } = await api(`/api/bookings/${id}`); course.seats = seats; renderOrder(data); } catch {}
+}
+
+function wireOrderActions(existingId) {
+  const id = existingId || new URLSearchParams(location.search).get('booking') || window.__bookingId || null;
+  const cf = document.getElementById('confirmBtn');
+  const cx = document.getElementById('cancelBtn');
+  const rb = document.getElementById('rebookBtn');
+  const currentId = async () => {
+    if (id) return id;
+    const contact = getContact();
+    if (!contact) return null;
+    const { data } = await api(`/api/bookings/by-contact/${encodeURIComponent(contact)}`);
+    return data.find(x => x.course_slug === slug && ['held','confirmed','waitlisted'].includes(x.status))?.id || null;
+  };
+  if (cf) cf.onclick = async () => {
+    const bid = await currentId();
+    cf.disabled = true;
+    const key = saveIdem(`confirm:${bid}`, getIdem(`confirm:${bid}`) || idemKey('cf', { b: bid }));
+    try {
+      await submitWithRetry(`/api/bookings/${bid}/confirm`, { student_contact: getContact(), idempotency_key: key });
+      toast('报名已确认，席位锁定', 'ok'); await refreshBooking(bid);
+    } catch (e) { cf.disabled = false; toast(e.message, 'err'); await refreshBooking(bid); }
+  };
+  if (cx) cx.onclick = async () => {
+    const bid = await currentId();
+    if (!confirm('确定取消？确认名额取消后将按候补顺序递补。')) return;
+    const key = saveIdem(`cancel:${bid}`, getIdem(`cancel:${bid}`) || idemKey('cx', { b: bid }));
+    try {
+      const r = await submitWithRetry(`/api/bookings/${bid}/cancel`, { student_contact: getContact(), idempotency_key: key });
+      toast(r.data.promoted?.length ? `已取消，候补第一位已获得 ${course.seats.hold_seconds} 秒保留` : '已取消', 'ok');
+      await refreshBooking(bid);
+    } catch (e) { toast(e.message, 'err'); }
+  };
+  if (rb) rb.onclick = () => { saveIdem(`book:${course.id}:${getContact()}`, null); localStorage.removeItem(`book:${course.id}:${getContact()}`); render(); };
+}
+
+// 支持 /booking?slug=..&booking=.. 直达订单
+load().then(() => {
+  const bid = new URLSearchParams(location.search).get('booking');
+  if (bid) showOrder(bid).catch(() => {});
+}).catch(e => app.innerHTML = `<div class="notice content"><strong>加载失败</strong><span class="sub">${esc(e.message)}</span></div>`);
+</script>
+</body>
+</html>

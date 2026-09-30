@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="月隐茶篓插画">
+  <defs>
+    <radialGradient id="glow" cx=".5" cy=".3" r=".8">
+      <stop offset="0" stop-color="#f7f0df"/><stop offset="1" stop-color="#e7d9bd"/>
+    </radialGradient>
+    <pattern id="hex" width="26" height="30" patternUnits="userSpaceOnUse">
+      <path d="M13 0 26 7.5v15L13 30 0 22.5v-15z" fill="none" stroke="#9a7b48" stroke-width="1.6"/>
+    </pattern>
+  </defs>
+  <rect width="480" height="320" fill="url(#glow)"/>
+  <circle cx="382" cy="70" r="40" fill="#e8ddc0"/>
+  <circle cx="398" cy="62" r="40" fill="url(#glow)"/>
+  <ellipse cx="190" cy="266" rx="150" ry="18" fill="#000" opacity=".06"/>
+  <path d="M120 96h140l-12 150q-3 20-58 20t-58-20z" fill="#c9a86c"/>
+  <path d="M120 96h140l-12 150q-3 20-58 20t-58-20z" fill="url(#hex)" opacity=".9"/>
+  <ellipse cx="190" cy="96" rx="72" ry="18" fill="#6e5228"/>
+  <ellipse cx="190" cy="92" rx="64" ry="13" fill="#3f2f16"/>
+  <path d="M126 120h128M120 160h140M116 200h148M120 240h140" stroke="#7c5f33" stroke-width="3" opacity=".5"/>
+  <g stroke="#7a9a5a" stroke-width="3" opacity=".8">
+    <path d="M60 300c20-60 40-90 90-120" fill="none"/>
+    <path d="M96 226l-16-4 8-14z" fill="#8aa86a"/>
+    <path d="M112 208l-8-14 16-2z" fill="#8aa86a"/>
+  </g>
+</svg>

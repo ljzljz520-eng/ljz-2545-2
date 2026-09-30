@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="山岚米筛插画">
+  <rect width="480" height="320" fill="#efe7d3"/>
+  <ellipse cx="240" cy="280" rx="180" ry="16" fill="#000" opacity=".06"/>
+  <circle cx="240" cy="160" r="118" fill="#d8c49a"/>
+  <circle cx="240" cy="160" r="118" fill="none" stroke="#8a6d3b" stroke-width="14"/>
+  <circle cx="240" cy="160" r="92" fill="#e6d6b0"/>
+  <g stroke="#a98c54" stroke-width="1.4">
+    <path d="M150 160h180M160 128h160M160 192h160M180 100h120M180 220h120M204 80h72M204 240h72"/>
+    <path d="M240 68v184M208 74v172M176 92v136M272 74v172M304 92v136"/>
+  </g>
+  <path d="M236 132c10 16 10 30 0 46-10-16-10-30 0-46z" fill="#b3462f"/>
+</svg>

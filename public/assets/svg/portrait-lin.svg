@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="传承人画像示意">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe6d2"/><stop offset="1" stop-color="#e3d4b8"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#bg)"/>
+  <g stroke="#c9b48a" stroke-width="1" opacity=".55">
+    <path d="M0 40H240M0 80H240M0 120H240M0 160H240M0 200H240"/>
+  </g>
+  <circle cx="120" cy="96" r="46" fill="#d9b48c"/>
+  <path d="M78 92q6-46 42-46 38 0 42 46q-20-14-42-14t-42 14z" fill="#5a4632"/>
+  <path d="M84 104q-8 60 36 62 44-2 36-62-18 18-36 18t-36-18z" fill="#7a5a3a"/>
+  <path d="M60 236q8-52 60-52t60 52z" fill="#3f6b53"/>
+  <path d="M104 184h32l-4 22h-24z" fill="#2e4f3d"/>
+  <circle cx="104" cy="96" r="3.4" fill="#3a2c1e"/><circle cx="136" cy="96" r="3.4" fill="#3a2c1e"/>
+  <path d="M110 112q10 8 20 0" stroke="#6b4a2e" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M40 46q14-10 28 0M172 46q14-10 28 0" stroke="#6f8f5f" stroke-width="2" fill="none" opacity=".7"/>
+</svg>
