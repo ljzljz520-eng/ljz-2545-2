@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ich
+      POSTGRES_PASSWORD: ich
+      POSTGRES_DB: ichcraft
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ich -d ichcraft"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: ich
+      PGPASSWORD: ich
+      PGDATABASE: ichcraft
+      PORT: "4000"
+      HOLD_TTL_MS: "90000"
+      INVITE_TTL_MS: "600000"
+      SWEEP_INTERVAL_MS: "15000"
+      ADMIN_KEY: "change-me-in-production"
+      SEED_ON_START: "1"
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

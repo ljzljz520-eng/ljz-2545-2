@@ -1,0 +1,4 @@
+
+# local embedded postgres data
+.pgdata/
+*.tsv

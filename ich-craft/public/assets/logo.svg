@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="守艺 logo">
+  <circle cx="32" cy="32" r="30" fill="#8c2f23"/>
+  <circle cx="32" cy="32" r="25" fill="none" stroke="#f2c14e" stroke-width="2"/>
+  <path d="M32 14 C40 24 40 40 32 50 C24 40 24 24 32 14 Z" fill="#f2c14e"/>
+  <path d="M16 32 C26 24 40 24 48 32 C40 40 26 40 16 32 Z" fill="#e0893f" opacity="0.9"/>
+  <circle cx="32" cy="32" r="5" fill="#f7f1e4"/>
+</svg>

@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200"><rect width="320" height="200" fill="#f7f1e4"/>
+<g transform="translate(50 60) rotate(-8)"><rect width="220" height="12" rx="6" fill="#cda65f"/><rect y="22" width="190" height="12" rx="6" fill="#b58a4a"/><rect y="44" width="205" height="12" rx="6" fill="#cda65f"/><rect y="66" width="170" height="12" rx="6" fill="#b58a4a"/></g>
+<path d="M250 130 q16 -20 34 -4" fill="none" stroke="#7a5a28" stroke-width="5"/>
+<text x="160" y="186" text-anchor="middle" font-family="serif" font-size="15" fill="#5b4a36">选竹破篾</text></svg>

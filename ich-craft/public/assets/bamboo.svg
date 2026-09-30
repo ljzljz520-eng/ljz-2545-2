@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="竹编茶则：人字纹篾编">
+  <rect width="480" height="320" fill="#f7f1e4"/>
+  <defs>
+    <pattern id="herring" width="40" height="24" patternUnits="userSpaceOnUse">
+      <rect width="40" height="24" fill="#e8c98c"/>
+      <path d="M0 24 L20 4 L40 24" fill="none" stroke="#9c7433" stroke-width="4"/>
+      <path d="M0 4 L20 24 L40 4" fill="none" stroke="#c9a15b" stroke-width="3" opacity="0.8"/>
+    </pattern>
+  </defs>
+  <ellipse cx="240" cy="172" rx="180" ry="92" fill="#7a5a28"/>
+  <ellipse cx="240" cy="164" rx="170" ry="84" fill="url(#herring)"/>
+  <ellipse cx="240" cy="164" rx="170" ry="84" fill="none" stroke="#e0b86f" stroke-width="5"/>
+  <g stroke="#7a5a28" stroke-width="2" opacity="0.35" fill="none">
+    <ellipse cx="240" cy="164" rx="120" ry="58"/>
+    <ellipse cx="240" cy="164" rx="70" ry="34"/>
+  </g>
+  <g transform="translate(70 60) rotate(-12)">
+    <rect width="190" height="12" rx="6" fill="#cda65f"/>
+    <rect y="18" width="150" height="12" rx="6" fill="#b58a4a"/>
+    <rect y="36" width="170" height="12" rx="6" fill="#cda65f"/>
+  </g>
+  <g fill="#5d7c4a">
+    <path d="M360 64 q24 -10 40 6 q-20 8 -40 -6 Z"/>
+  </g>
+</svg>

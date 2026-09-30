@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200"><rect width="320" height="200" fill="#f7f1e4"/>
+<defs><pattern id="h2" width="30" height="18" patternUnits="userSpaceOnUse"><rect width="30" height="18" fill="#e8c98c"/><path d="M0 18 L15 3 L30 18" fill="none" stroke="#9c7433" stroke-width="3"/></pattern></defs>
+<ellipse cx="160" cy="105" rx="120" ry="58" fill="#7a5a28"/>
+<ellipse cx="160" cy="100" rx="112" ry="52" fill="url(#h2)"/>
+<ellipse cx="160" cy="100" rx="112" ry="52" fill="none" stroke="#e0b86f" stroke-width="4"/>
+<text x="160" y="186" text-anchor="middle" font-family="serif" font-size="15" fill="#5b4a36">人字纹起编</text></svg>

@@ -1,0 +1,183 @@
+/* ============================================================
+   守艺 · 非遗手作平台 设计系统
+   依据见 docs/DESIGN.md：
+   - 色彩取自材料本身：朱砂红(剪纸)/靛蓝(扎染)/竹青(竹编)/生丝米纸
+   - 宋体标题呼应谱牒匾额，黑体正文保证屏幕可读
+   - 1.5 模数节奏、细线描边、纸纹留白
+   ============================================================ */
+:root {
+  --paper: #f7f1e4;
+  --paper-deep: #efe4cc;
+  --ink: #33281c;
+  --ink-soft: #6b5a43;
+  --cinnabar: #c0392b;
+  --cinnabar-deep: #8c2f23;
+  --indigo: #1d3a5c;
+  --indigo-soft: #2f5d8a;
+  --bamboo: #5d7c4a;
+  --gold: #c9a15b;
+  --line: #d9c9a8;
+  --danger: #a93226;
+  --ok: #2e6b45;
+  --warn: #9a6b12;
+  --radius: 10px;
+  --shadow: 0 8px 28px rgba(70, 50, 20, .12);
+  --maxw: 1080px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(201,161,91,.10), transparent 40%),
+    radial-gradient(circle at 90% 30%, rgba(29,58,92,.06), transparent 45%),
+    var(--paper);
+  line-height: 1.7;
+}
+h1,h2,h3 {
+  font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+  color: var(--ink); letter-spacing: .04em; margin: 0 0 .4em;
+}
+h1 { font-size: 2rem; }
+h2 { font-size: 1.45rem; }
+h3 { font-size: 1.15rem; }
+a { color: var(--cinnabar-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { max-width: 100%; display: block; }
+
+.container { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+
+/* 顶栏 */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(247,241,228,.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.site-header .row { display: flex; align-items: center; gap: 18px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: "Songti SC", serif;
+  font-size: 1.3rem; font-weight: 700; color: var(--cinnabar-deep); }
+.brand img { width: 34px; height: 34px; }
+nav { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+nav a { padding: 6px 12px; border-radius: 999px; color: var(--ink-soft); font-size: .95rem; }
+nav a.active, nav a:hover { background: var(--cinnabar); color: #fff; text-decoration: none; }
+
+/* 首页 hero */
+.hero { position: relative; border-bottom: 1px solid var(--line); }
+.hero img { width: 100%; max-height: 420px; object-fit: cover; }
+.hero .overlay { position: absolute; inset: 0; display: flex; flex-direction: column;
+  justify-content: center; padding: 0 8%;
+  background: linear-gradient(90deg, rgba(247,241,228,.88), rgba(247,241,228,.35) 55%, transparent); }
+.hero p.lead { max-width: 520px; color: var(--ink-soft); font-size: 1.05rem; }
+.seal { display: inline-block; background: var(--cinnabar-deep); color: #f7e9c8;
+  padding: 2px 10px; border-radius: 4px; font-size: .8rem; letter-spacing: .3em;
+  font-family: "Songti SC", serif; }
+
+.section { padding: 34px 0; }
+.section h2 { display: flex; align-items: baseline; gap: 12px; }
+.section h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+/* 卡片 */
+.grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.card { background: #fffdf6; border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+.card .thumb { aspect-ratio: 3/2; background: var(--paper-deep); overflow: hidden; }
+.card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.card .body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.card .meta { color: var(--ink-soft); font-size: .86rem; }
+.card .actions { margin-top: auto; padding-top: 10px; }
+
+/* 故事页 */
+.story-layout { display: grid; grid-template-columns: 1.7fr 1fr; gap: 28px; margin-top: 22px; }
+@media (max-width: 860px) { .story-layout { grid-template-columns: 1fr; } }
+.cover-frame { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  background: #fffdf6; box-shadow: var(--shadow); }
+.side-panel { background: #fffdf6; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px; box-shadow: var(--shadow); height: fit-content; }
+.side-panel h3 { border-left: 4px solid var(--cinnabar); padding-left: 10px; }
+.materials li { margin-bottom: 8px; }
+.steps { margin-top: 26px; display: grid; gap: 18px; }
+.step { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center;
+  background: #fffdf6; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
+.step img { border-radius: 8px; border: 1px solid var(--line); }
+.step .no { font-family: "Songti SC", serif; color: var(--cinnabar); font-weight: 700; }
+@media (max-width: 560px) { .step { grid-template-columns: 1fr; } }
+
+/* 提示条 */
+.notice { border-radius: 8px; padding: 10px 14px; margin: 12px 0; font-size: .93rem;
+  border: 1px solid; display: flex; gap: 10px; align-items: flex-start; }
+.notice .tag { font-weight: 700; white-space: nowrap; }
+.notice.seat { background: #fdf6e3; border-color: #e0c273; color: var(--warn); }
+.notice.content { background: #f3e9e7; border-color: #d8b3ad; color: var(--danger); }
+.notice.success { background: #e9f3ec; border-color: #9ec7ac; color: var(--ok); }
+.notice.info { background: #eaf0f6; border-color: #adc4d8; color: var(--indigo); }
+.notice.offline { background: #efe9db; border-color: var(--line); color: var(--ink-soft); }
+
+/* 按钮 / 表单 */
+.btn { display: inline-block; border: 1px solid var(--cinnabar); background: var(--cinnabar);
+  color: #fff; padding: 9px 20px; border-radius: 999px; cursor: pointer; font-size: .95rem;
+  transition: transform .08s, opacity .2s; }
+.btn:hover { opacity: .92; text-decoration: none; color: #fff; }
+.btn:active { transform: translateY(1px); }
+.btn.secondary { background: transparent; color: var(--cinnabar-deep); }
+.btn.ghost { background: transparent; color: var(--ink-soft); border-color: var(--line); }
+.btn.danger { background: var(--danger); border-color: var(--danger); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.small { padding: 5px 12px; font-size: .85rem; }
+
+label { display: block; font-size: .88rem; color: var(--ink-soft); margin: 10px 0 4px; }
+input, select { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px;
+  font-size: .95rem; background: #fffdf6; color: var(--ink); }
+input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.form-row > div { flex: 1; min-width: 160px; }
+
+/* 课次行 */
+.session { background: #fffdf6; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+  display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+@media (max-width: 680px) { .session { grid-template-columns: 1fr; } }
+.seat-pill { font-family: "Songti SC", serif; font-size: 1.5rem; font-weight: 700;
+  text-align: center; min-width: 86px; padding: 10px; border-radius: 10px; }
+.seat-pill.free { background: #e9f3ec; color: var(--ok); }
+.seat-pill.full { background: #f3e9e7; color: var(--danger); }
+.seat-pill small { display: block; font-family: sans-serif; font-size: .72rem; font-weight: 400; }
+
+/* 流程状态 */
+.flow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 10px 0; font-size: .9rem; }
+.flow .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.flow .dot.on { background: var(--ok); }
+.flow .sep { color: var(--line); }
+
+/* 订单 */
+.order { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px;
+  background: #fffdf6; margin-bottom: 12px; }
+.order.cancelled { opacity: .68; }
+.badge { font-size: .75rem; padding: 2px 9px; border-radius: 999px; border: 1px solid currentColor; }
+.badge.confirmed { color: var(--ok); }
+.badge.cancelled { color: var(--ink-soft); }
+.badge.invited { color: var(--warn); }
+
+/* 管理后台 */
+table { width: 100%; border-collapse: collapse; background: #fffdf6; font-size: .9rem;
+  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { background: var(--paper-deep); font-family: "Songti SC", serif; }
+tr:last-child td { border-bottom: none; }
+.tabs { display: flex; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+.tabs button { border: 1px solid var(--line); background: #fffdf6; padding: 6px 14px;
+  border-radius: 999px; cursor: pointer; }
+.tabs button.active { background: var(--indigo); color: #fff; border-color: var(--indigo); }
+
+footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 26px 0;
+  color: var(--ink-soft); font-size: .85rem; text-align: center; }
+.muted { color: var(--ink-soft); font-size: .85rem; }
+.toast-area { position: fixed; right: 18px; bottom: 18px; z-index: 100; display: flex;
+  flex-direction: column; gap: 10px; max-width: 380px; }
+.toast { background: var(--ink); color: var(--paper); padding: 11px 16px; border-radius: 10px;
+  box-shadow: var(--shadow); font-size: .9rem; animation: slidein .25s ease; }
+@keyframes slidein { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+.spinner { width: 18px; height: 18px; border: 2px solid rgba(0,0,0,.15);
+  border-top-color: var(--cinnabar); border-radius: 50%; animation: spin .7s linear infinite;
+  display: inline-block; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-label="非遗手作：针线、染缸与竹篾">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7f1e4"/>
+      <stop offset="1" stop-color="#efe4cc"/>
+    </linearGradient>
+    <linearGradient id="indigo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f5d8a"/>
+      <stop offset="1" stop-color="#1d3a5c"/>
+    </linearGradient>
+    <pattern id="weave" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="26" height="26" fill="#b58a4a"/>
+      <rect x="0" y="0" width="26" height="9" fill="#cda65f"/>
+      <rect x="0" y="15" width="26" height="3" fill="#8f6a33"/>
+    </pattern>
+    <g id="flwr">
+      <path d="M0,-14 C8,-8 8,8 0,14 C-8,8 -8,-8 0,-14 Z" fill="#c0392b"/>
+      <path d="M-14,0 C-8,-8 8,-8 14,0 C8,8 -8,8 -14,0 Z" fill="#d85a3d"/>
+      <circle r="5" fill="#f2c14e"/>
+    </g>
+  </defs>
+  <rect width="1200" height="520" fill="url(#sky)"/>
+  <!-- 远山 -->
+  <path d="M0 330 Q180 250 360 320 T720 300 T1200 330 V520 H0 Z" fill="#d8c9a8" opacity="0.7"/>
+  <path d="M0 380 Q240 320 480 372 T960 360 T1200 380 V520 H0 Z" fill="#c9b58c" opacity="0.8"/>
+
+  <!-- 悬挂剪纸圆牌 -->
+  <g transform="translate(210 0)">
+    <line x1="0" y1="0" x2="0" y2="92" stroke="#9a6b3f" stroke-width="2"/>
+    <circle cx="0" cy="160" r="72" fill="#c0392b"/>
+    <circle cx="0" cy="160" r="62" fill="none" stroke="#f2c14e" stroke-width="3"/>
+    <use href="#flwr" x="0" y="160"/>
+    <g fill="#f2c14e">
+      <circle cx="-44" cy="160" r="5"/><circle cx="44" cy="160" r="5"/>
+      <circle cx="0" cy="116" r="5"/><circle cx="0" cy="204" r="5"/>
+    </g>
+    <path d="M-18 244 l18 22 l18 -22" fill="none" stroke="#f2c14e" stroke-width="4"/>
+  </g>
+
+  <!-- 染缸 -->
+  <g transform="translate(540 250)">
+    <ellipse cx="0" cy="120" rx="150" ry="26" fill="#12253c"/>
+    <path d="M-150 20 Q-140 120 0 132 Q140 120 150 20 Z" fill="url(#indigo)"/>
+    <ellipse cx="0" cy="20" rx="150" ry="30" fill="#274d75"/>
+    <ellipse cx="0" cy="18" rx="120" ry="22" fill="#1d3a5c"/>
+    <path d="M-60 -10 q20 -26 40 0 t40 0 t40 0" fill="none" stroke="#9ec6e8" stroke-width="4"/>
+    <circle cx="-30" cy="-26" r="9" fill="#f7f1e4" opacity="0.9"/>
+    <circle cx="20" cy="-40" r="7" fill="#f7f1e4" opacity="0.8"/>
+    <!-- 扎染布 -->
+    <g transform="translate(10 -96)">
+      <rect x="-58" y="-44" width="116" height="88" rx="10" fill="#e9eef5"/>
+      <g fill="#2f5d8a" opacity="0.85">
+        <circle cx="-26" cy="-16" r="14"/><circle cx="18" cy="2" r="18"/>
+        <circle cx="-6" cy="26" r="10"/><circle cx="34" cy="-26" r="8"/>
+      </g>
+      <g fill="none" stroke="#1d3a5c" stroke-width="3" opacity="0.6">
+        <circle cx="-26" cy="-16" r="14"/><circle cx="18" cy="2" r="18"/>
+      </g>
+      <path d="M-58 -8 Q0 14 58 -8" fill="none" stroke="#c9d6e4" stroke-width="3"/>
+    </g>
+  </g>
+
+  <!-- 竹编簸箕 -->
+  <g transform="translate(950 270)">
+    <ellipse cx="0" cy="60" rx="120" ry="40" fill="url(#weave)" stroke="#7a5a28" stroke-width="6"/>
+    <ellipse cx="0" cy="52" rx="120" ry="40" fill="none" stroke="#e0b86f" stroke-width="5"/>
+    <g stroke="#7a5a28" stroke-width="2" opacity="0.5">
+      <line x1="-118" y1="52" x2="118" y2="52"/>
+      <path d="M-110 40 Q0 72 110 40" fill="none"/>
+      <path d="M-96 28 Q0 90 96 28" fill="none"/>
+    </g>
+    <!-- 篾条 -->
+    <g transform="translate(-40 -70) rotate(-18)">
+      <rect width="150" height="10" rx="5" fill="#cda65f"/>
+      <rect y="16" width="120" height="10" rx="5" fill="#b58a4a"/>
+    </g>
+    <path d="M40 -60 q10 -14 24 -6 q14 6 6 22 q-8 16 -26 12" fill="none" stroke="#7a5a28" stroke-width="5"/>
+  </g>
+
+  <!-- 针线轨迹 -->
+  <path d="M120 430 Q360 470 470 420" fill="none" stroke="#c0392b" stroke-width="3" stroke-dasharray="10 8"/>
+  <g transform="translate(120 430)">
+    <path d="M0 0 l26 -6 l-2 14 z" fill="#9a6b3f"/>
+  </g>
+</svg>

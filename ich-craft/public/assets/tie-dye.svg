@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="扎染方巾：蓝白冰裂纹">
+  <defs>
+    <radialGradient id="bloom" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f7f1e4"/>
+      <stop offset="0.55" stop-color="#f7f1e4"/>
+      <stop offset="0.58" stop-color="#2f5d8a"/>
+      <stop offset="0.8" stop-color="#1d3a5c"/>
+      <stop offset="1" stop-color="#f7f1e4"/>
+    </radialGradient>
+  </defs>
+  <rect width="480" height="320" fill="#e9eef5"/>
+  <rect x="24" y="24" width="432" height="272" rx="8" fill="#f7f1e4" stroke="#2f5d8a" stroke-width="4"/>
+  <g>
+    <circle cx="160" cy="120" r="62" fill="url(#bloom)"/>
+    <circle cx="330" cy="130" r="48" fill="url(#bloom)"/>
+    <circle cx="230" cy="230" r="56" fill="url(#bloom)"/>
+    <circle cx="380" cy="240" r="30" fill="url(#bloom)"/>
+    <circle cx="90" cy="240" r="28" fill="url(#bloom)"/>
+  </g>
+  <g fill="none" stroke="#1d3a5c" stroke-width="1.6" opacity="0.55">
+    <path d="M40 70 l70 30 l-40 50 l80 20"/>
+    <path d="M300 60 l-50 60 l60 40 l-30 70"/>
+    <path d="M60 280 l90 -50 l70 30"/>
+  </g>
+  <g stroke="#c9a86a" stroke-width="2" stroke-dasharray="4 6" opacity="0.8">
+    <rect x="34" y="34" width="412" height="252" rx="4" fill="none"/>
+  </g>
+</svg>

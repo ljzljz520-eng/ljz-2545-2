@@ -1,0 +1,20 @@
+{
+  "name": "ich-craft",
+  "version": "1.0.0",
+  "description": "守艺 · 非遗手作主题网站：内容授权 + 课程席位（预约保留/超时回收/候补递补）",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node scripts/dev-start.mjs",
+    "seed": "node scripts/seed.js",
+    "start": "node src/server.js",
+    "test": "HOLD_TTL_MS=8000 INVITE_TTL_MS=60000 SWEEP_INTERVAL_MS=500 node --test tests/"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "embedded-postgres": "^18.4.0-beta.17"
+  }
+}
